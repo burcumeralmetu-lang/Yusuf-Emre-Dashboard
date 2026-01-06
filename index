@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yusuf Emre Öner - Gelişim Analiz Dashboard'u</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 2rem;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .score-row .score {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .score-row.self .score {
+            color: #3b82f6;
+        }
+
+        .score-row.seyir .score {
+            color: #a855f7;
+        }
+
+        .score-row .label {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-top: 1rem;
+        }
+
+        .chart-wrapper.tall {
+            height: 600px;
+        }
+
+        .gap-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .gap-controls select {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            background: white;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #fef3c7;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+
+        .improvement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .improvement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            transition: transform 0.2s;
+        }
+
+        .improvement-item:hover {
+            transform: translateX(5px);
+        }
+
+        .improvement-badge {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 2rem;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #16a34a;
+            font-size: 0.875rem;
+        }
+
+        .improvement-text {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .improvement-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: #16a34a;
+            font-size: 1.125rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th.center {
+            text-align: center;
+        }
+
+        td {
+            padding: 1rem 0.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        td.center {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        td.self {
+            color: #3b82f6;
+        }
+
+        td.seyir {
+            color: #a855f7;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .gap-cell {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .gap-positive {
+            color: #f59e0b;
+        }
+
+        .gap-negative {
+            color: #ef4444;
+        }
+
+        .gap-neutral {
+            color: #94a3b8;
+        }
+
+        .insights {
+            background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .insights h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .insights p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .insights strong {
+            color: #1e293b;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Yusuf Emre Öner</h1>
+            <p>3 Dönemlik Gelişim Analizi - Seyir Mezunları Programı</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <h3>1. Dönem Ortalama</h3>
+                <div class="score-row self">
+                    <span class="score" id="avg-self-p1">3.30</span>
+                    <span class="label">Kendisi</span>
+                </div>
+                <div class="score-row seyir">
+                    <span class="score" id="avg-seyir-p1">3.33</span>
+                    <span class="label">Seyir</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. Dönem Ortalama</h3>
+                <div class="score-row self">
+                    <span class="score" id="avg-self-p2">3.89</span>
+                    <span class="label">Kendisi</span>
+                </div>
+                <div class="score-row seyir">
+                    <span class="score" id="avg-seyir-p2">3.44</span>
+                    <span class="label">Seyir</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3. Dönem Ortalama</h3>
+                <div class="score-row self">
+                    <span class="score" id="avg-self-p3">3.56</span>
+                    <span class="label">Kendisi</span>
+                </div>
+                <div class="score-row seyir">
+                    <span class="score" id="avg-seyir-p3">3.17</span>
+                    <span class="label">Seyir</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trend Chart -->
+        <div class="chart-container">
+            <h2>Dönemsel Gelişim Trendi</h2>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gap Analysis -->
+        <div class="chart-container">
+            <div class="gap-controls">
+                <h2>Perception Gap Analizi</h2>
+                <select id="periodSelect" onchange="updateGapChart()">
+                    <option value="3">3. Dönem</option>
+                    <option value="2">2. Dönem</option>
+                    <option value="1">1. Dönem</option>
+                </select>
+            </div>
+            <div class="alert">
+                <span>⚠️</span>
+                <span>Pozitif değer: Kendini Seyir'den yüksek görüyor | Negatif değer: Kendini Seyir'den düşük görüyor</span>
+            </div>
+            <div class="chart-wrapper tall">
+                <canvas id="gapChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Improvement List -->
+        <div class="chart-container">
+            <h2>En Çok Gelişim Gösteren Yetkinlikler (1. → 3. Dönem)</h2>
+            <div class="improvement-list" id="improvementList"></div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="chart-container">
+            <h2>Detaylı Yetkinlik Karşılaştırması</h2>
+            <div class="table-container">
+                <table id="detailedTable"></table>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="insights">
+            <h2>Temel İçgörüler</h2>
+            <p>
+                <strong>📈 Genel Trend:</strong> Yusuf Emre'nin kendine verdiği ortalama puan 1. dönemden 3. döneme 
+                <span id="insight-self-trend"></span> yönünde değişti. Seyir Mezunları'nın verdiği puan ise 
+                <span id="insight-seyir-trend"></span> oldu.
+            </p>
+            <p>
+                <strong>🎯 Perception Gap:</strong> 3. dönemde Yusuf Emre'nin kendi değerlendirmesi ile Seyir Mezunları'nın 
+                değerlendirmesi arasında ortalama <span id="insight-gap"></span> puanlık fark var.
+            </p>
+            <p>
+                <strong>💡 En Büyük Gap'ler:</strong> En büyük algı farklılıkları Gap Analizi grafiğinde gösterilmektedir. 
+                Pozitif gap'ler kendini olduğundan yüksek, negatif gap'ler ise düşük değerlendirdiği alanları gösterir.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const competencies = [
+            "Umutlu halimle örnek olurum",
+            "Başarısızlıkta endişeye düşmem",
+            "Karmaşık görevlerde bile dağılmam, belirlenmiş plana sadık kalırım",
+            "Pek çok bilgi arasından fark yaratan sinyalleri yakalamaya odaklanırım",
+            "Fikrime aşık kalmam, doğru argümanla gelindiğinde ikna olurum",
+            "Başarıda kibre kapılmam ve bunun bir birlikte başarma olduğunu hatırlarım",
+            "Mevcut olan ile yetinmem, daha iyisi için sürekli challenge ederim",
+            "Yaşanılan sorunları geçiştirmem, köklü çözümler bulurum",
+            "Kendi güçlü ve gelişim alanlarımı açıklıkla paylaşırım",
+            "Ekip arkadaşlarımın güçlü yanlarını görür ve ilham alırım",
+            "Güzel ve etkili bir davranış gördüğümde samimiyetle takdir ederim",
+            "Anlaşmazlığa düşmekten çekinmem, görüşlerimi net bir şekilde ifade ederim",
+            "İleri bildirim verirken net ve direkt olurum",
+            "İleri bildirim verildiğinde savunmaya geçmem",
+            "Verilen ileri bildirimleri hızla aksiyonlara dönüştürerek hayata geçiririm",
+            "Aciliyet hissim yüksektir, hızlı karar alırım",
+            "Gerçekçi hedefler ve deadline'lar belirlerim"
+        ];
+
+        const data = {
+            period1: {
+                self: [3, 4, 3, 2, 3, 3, 3, 4, 4, 4, 4, 4, 3, 2, 4, 4],
+                seyir: [3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 3, 4]
+            },
+            period2: {
+                self: [3, 8, 9, 4, 3, 5, 4, 4, 4, 5, 4, 4, 5, 5, 3, 3, 3],
+                seyir: [3, 4, 4, 4, 4, 4, 3, 4, 4, 3, 3, 2, 4, 4, 3, 3, 4]
+            },
+            period3: {
+                self: [3, 5, 6, 3, 4, 4, 3, 4, 4, 5, 4, 3, 4, 3, 3, 3, 3],
+                seyir: [3, 1, 7, 4, 4, 4, 3, 4, 4, 2, 2, 3, 4, 4, 2, 3, 3]
+            }
+        };
+
+        // Calculate averages
+        function calculateAverage(arr) {
+            return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+        }
+
+        const avgSelfP1 = calculateAverage(data.period1.self);
+        const avgSeyirP1 = calculateAverage(data.period1.seyir);
+        const avgSelfP2 = calculateAverage(data.period2.self);
+        const avgSeyirP2 = calculateAverage(data.period2.seyir);
+        const avgSelfP3 = calculateAverage(data.period3.self);
+        const avgSeyirP3 = calculateAverage(data.period3.seyir);
+
+        // Update summary cards
+        document.getElementById('avg-self-p1').textContent = avgSelfP1;
+        document.getElementById('avg-seyir-p1').textContent = avgSeyirP1;
+        document.getElementById('avg-self-p2').textContent = avgSelfP2;
+        document.getElementById('avg-seyir-p2').textContent = avgSeyirP2;
+        document.getElementById('avg-self-p3').textContent = avgSelfP3;
+        document.getElementById('avg-seyir-p3').textContent = avgSeyirP3;
+
+        // Update insights
+        document.getElementById('insight-self-trend').textContent = `${avgSelfP1} → ${avgSelfP3}`;
+        document.getElementById('insight-seyir-trend').textContent = `${avgSeyirP1} → ${avgSeyirP3}`;
+        document.getElementById('insight-gap').textContent = Math.abs(avgSelfP3 - avgSeyirP3).toFixed(2);
+
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['1. Dönem', '2. Dönem', '3. Dönem'],
+                datasets: [{
+                    label: 'Yusuf Emre (Kendisi)',
+                    data: [parseFloat(avgSelfP1), parseFloat(avgSelfP2), parseFloat(avgSelfP3)],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                }, {
+                    label: 'Seyir Mezunları',
+                    data: [parseFloat(avgSeyirP1), parseFloat(avgSeyirP2), parseFloat(avgSeyirP3)],
+                    borderColor: '#a855f7',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                }
+            }
+        });
+
+        // Gap Chart
+        let gapChart;
+        function updateGapChart() {
+            const period = document.getElementById('periodSelect').value;
+            const periodData = data[`period${period}`];
+            
+            const gapData = competencies.map((comp, idx) => {
+                const selfScore = periodData.self[idx] || 0;
+                const seyirScore = periodData.seyir[idx] || 0;
+                return {
+                    name: comp.length > 50 ? comp.substring(0, 50) + '...' : comp,
+                    gap: selfScore - seyirScore
+                };
+            }).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+
+            if (gapChart) {
+                gapChart.destroy();
+            }
+
+            const gapCtx = document.getElementById('gapChart').getContext('2d');
+            gapChart = new Chart(gapCtx, {
+                type: 'bar',
+                data: {
+                    labels: gapData.map(d => d.name),
+                    datasets: [{
+                        label: 'Gap (Kendisi - Seyir)',
+                        data: gapData.map(d => d.gap),
+                        backgroundColor: gapData.map(d => 
+                            d.gap > 0 ? 'rgba(245, 158, 11, 0.8)' : 
+                            d.gap < 0 ? 'rgba(239, 68, 68, 0.8)' : 
+                            'rgba(148, 163, 184, 0.8)'
+                        ),
+                        borderColor: gapData.map(d => 
+                            d.gap > 0 ? '#f59e0b' : 
+                            d.gap < 0 ? '#ef4444' : 
+                            '#94a3b8'
+                        ),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: -5,
+                            max: 5
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize gap chart
+        updateGapChart();
+
+        // Improvement List
+        const improvementData = competencies.map((comp, idx) => ({
+            name: comp,
+            improvement: (data.period3.self[idx] || 0) - (data.period1.self[idx] || 0)
+        })).sort((a, b) => b.improvement - a.improvement).slice(0, 5);
+
+        const improvementList = document.getElementById('improvementList');
+        improvementData.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'improvement-item';
+            div.innerHTML = `
+                <div class="improvement-badge">${idx + 1}</div>
+                <div class="improvement-text">${item.name}</div>
+                <div class="improvement-score">↗ +${item.improvement}</div>
+            `;
+            improvementList.appendChild(div);
+        });
+
+        // Detailed Table
+        const table = document.getElementById('detailedTable');
+        let tableHTML = `
+            <thead>
+                <tr>
+                    <th>Yetkinlik</th>
+                    <th class="center">1.Dönem<br>Kendisi</th>
+                    <th class="center">1.Dönem<br>Seyir</th>
+                    <th class="center">2.Dönem<br>Kendisi</th>
+                    <th class="center">2.Dönem<br>Seyir</th>
+                    <th class="center">3.Dönem<br>Kendisi</th>
+                    <th class="center">3.Dönem<br>Seyir</th>
+                    <th class="center">3.Dönem<br>Gap</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        competencies.forEach((comp, idx) => {
+            const p1Self = data.period1.self[idx] || 0;
+            const p1Seyir = data.period1.seyir[idx] || 0;
+            const p2Self = data.period2.self[idx] || 0;
+            const p2Seyir = data.period2.seyir[idx] || 0;
+            const p3Self = data.period3.self[idx] || 0;
+            const p3Seyir = data.period3.seyir[idx] || 0;
+            const gap3 = p3Self - p3Seyir;
+            
+            const gapClass = gap3 > 0 ? 'gap-positive' : gap3 < 0 ? 'gap-negative' : 'gap-neutral';
+            const gapIcon = gap3 > 0 ? '↗' : gap3 < 0 ? '↘' : '−';
+
+            tableHTML += `
+                <tr>
+                    <td>${comp}</td>
+                    <td class="center self">${p1Self}</td>
+                    <td class="center seyir">${p1Seyir}</td>
+                    <td class="center self">${p2Self}</td>
+                    <td class="center seyir">${p2Seyir}</td>
+                    <td class="center self">${p3Self}</td>
+                    <td class="center seyir">${p3Seyir}</td>
+                    <td class="gap-cell ${gapClass}">${gapIcon} ${gap3 > 0 ? '+' : ''}${gap3}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += '</tbody>';
+        table.innerHTML = tableHTML;
+    </script>
+</body>
+</html>

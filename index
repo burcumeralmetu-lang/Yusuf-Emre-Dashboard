@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yusuf Emre Öner - Gelişim Analiz Dashboard'u</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>Yusuf Emre Öner - Gelişim Analiz Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,6 +17,7 @@
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             padding: 2rem;
             color: #1e293b;
+            min-height: 100vh;
         }
 
         .container {
@@ -299,22 +300,20 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>Yusuf Emre Öner</h1>
             <p>3 Dönemlik Gelişim Analizi - Seyir Mezunları Programı</p>
         </div>
 
-        <!-- Summary Cards -->
         <div class="summary-cards">
             <div class="card">
                 <h3>1. Dönem Ortalama</h3>
                 <div class="score-row self">
-                    <span class="score" id="avg-self-p1">3.30</span>
+                    <span class="score" id="avgSelfP1">3.30</span>
                     <span class="label">Kendisi</span>
                 </div>
                 <div class="score-row seyir">
-                    <span class="score" id="avg-seyir-p1">3.33</span>
+                    <span class="score" id="avgSeyirP1">3.33</span>
                     <span class="label">Seyir</span>
                 </div>
             </div>
@@ -322,11 +321,11 @@
             <div class="card">
                 <h3>2. Dönem Ortalama</h3>
                 <div class="score-row self">
-                    <span class="score" id="avg-self-p2">3.89</span>
+                    <span class="score" id="avgSelfP2">3.89</span>
                     <span class="label">Kendisi</span>
                 </div>
                 <div class="score-row seyir">
-                    <span class="score" id="avg-seyir-p2">3.44</span>
+                    <span class="score" id="avgSeyirP2">3.44</span>
                     <span class="label">Seyir</span>
                 </div>
             </div>
@@ -334,17 +333,16 @@
             <div class="card">
                 <h3>3. Dönem Ortalama</h3>
                 <div class="score-row self">
-                    <span class="score" id="avg-self-p3">3.56</span>
+                    <span class="score" id="avgSelfP3">3.56</span>
                     <span class="label">Kendisi</span>
                 </div>
                 <div class="score-row seyir">
-                    <span class="score" id="avg-seyir-p3">3.17</span>
+                    <span class="score" id="avgSeyirP3">3.17</span>
                     <span class="label">Seyir</span>
                 </div>
             </div>
         </div>
 
-        <!-- Trend Chart -->
         <div class="chart-container">
             <h2>Dönemsel Gelişim Trendi</h2>
             <div class="chart-wrapper">
@@ -352,11 +350,10 @@
             </div>
         </div>
 
-        <!-- Gap Analysis -->
         <div class="chart-container">
             <div class="gap-controls">
                 <h2>Perception Gap Analizi</h2>
-                <select id="periodSelect" onchange="updateGapChart()">
+                <select id="periodSelect">
                     <option value="3">3. Dönem</option>
                     <option value="2">2. Dönem</option>
                     <option value="1">1. Dönem</option>
@@ -371,13 +368,11 @@
             </div>
         </div>
 
-        <!-- Improvement List -->
         <div class="chart-container">
             <h2>En Çok Gelişim Gösteren Yetkinlikler (1. → 3. Dönem)</h2>
             <div class="improvement-list" id="improvementList"></div>
         </div>
 
-        <!-- Detailed Table -->
         <div class="chart-container">
             <h2>Detaylı Yetkinlik Karşılaştırması</h2>
             <div class="table-container">
@@ -385,17 +380,16 @@
             </div>
         </div>
 
-        <!-- Insights -->
         <div class="insights">
             <h2>Temel İçgörüler</h2>
             <p>
                 <strong>📈 Genel Trend:</strong> Yusuf Emre'nin kendine verdiği ortalama puan 1. dönemden 3. döneme 
-                <span id="insight-self-trend"></span> yönünde değişti. Seyir Mezunları'nın verdiği puan ise 
-                <span id="insight-seyir-trend"></span> oldu.
+                <span id="insightSelfTrend"></span> yönünde değişti. Seyir Mezunları'nın verdiği puan ise 
+                <span id="insightSeyirTrend"></span> oldu.
             </p>
             <p>
                 <strong>🎯 Perception Gap:</strong> 3. dönemde Yusuf Emre'nin kendi değerlendirmesi ile Seyir Mezunları'nın 
-                değerlendirmesi arasında ortalama <span id="insight-gap"></span> puanlık fark var.
+                değerlendirmesi arasında ortalama <span id="insightGap"></span> puanlık fark var.
             </p>
             <p>
                 <strong>💡 En Büyük Gap'ler:</strong> En büyük algı farklılıkları Gap Analizi grafiğinde gösterilmektedir. 
@@ -405,7 +399,6 @@
     </div>
 
     <script>
-        // Data
         const competencies = [
             "Umutlu halimle örnek olurum",
             "Başarısızlıkta endişeye düşmem",
@@ -441,34 +434,30 @@
             }
         };
 
-        // Calculate averages
-        function calculateAverage(arr) {
+        function avg(arr) {
             return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
         }
 
-        const avgSelfP1 = calculateAverage(data.period1.self);
-        const avgSeyirP1 = calculateAverage(data.period1.seyir);
-        const avgSelfP2 = calculateAverage(data.period2.self);
-        const avgSeyirP2 = calculateAverage(data.period2.seyir);
-        const avgSelfP3 = calculateAverage(data.period3.self);
-        const avgSeyirP3 = calculateAverage(data.period3.seyir);
+        const avgSelfP1 = avg(data.period1.self);
+        const avgSeyirP1 = avg(data.period1.seyir);
+        const avgSelfP2 = avg(data.period2.self);
+        const avgSeyirP2 = avg(data.period2.seyir);
+        const avgSelfP3 = avg(data.period3.self);
+        const avgSeyirP3 = avg(data.period3.seyir);
 
-        // Update summary cards
-        document.getElementById('avg-self-p1').textContent = avgSelfP1;
-        document.getElementById('avg-seyir-p1').textContent = avgSeyirP1;
-        document.getElementById('avg-self-p2').textContent = avgSelfP2;
-        document.getElementById('avg-seyir-p2').textContent = avgSeyirP2;
-        document.getElementById('avg-self-p3').textContent = avgSelfP3;
-        document.getElementById('avg-seyir-p3').textContent = avgSeyirP3;
+        document.getElementById('avgSelfP1').textContent = avgSelfP1;
+        document.getElementById('avgSeyirP1').textContent = avgSeyirP1;
+        document.getElementById('avgSelfP2').textContent = avgSelfP2;
+        document.getElementById('avgSeyirP2').textContent = avgSeyirP2;
+        document.getElementById('avgSelfP3').textContent = avgSelfP3;
+        document.getElementById('avgSeyirP3').textContent = avgSeyirP3;
 
-        // Update insights
-        document.getElementById('insight-self-trend').textContent = `${avgSelfP1} → ${avgSelfP3}`;
-        document.getElementById('insight-seyir-trend').textContent = `${avgSeyirP1} → ${avgSeyirP3}`;
-        document.getElementById('insight-gap').textContent = Math.abs(avgSelfP3 - avgSeyirP3).toFixed(2);
+        document.getElementById('insightSelfTrend').textContent = avgSelfP1 + ' → ' + avgSelfP3;
+        document.getElementById('insightSeyirTrend').textContent = avgSeyirP1 + ' → ' + avgSeyirP3;
+        document.getElementById('insightGap').textContent = Math.abs(avgSelfP3 - avgSeyirP3).toFixed(2);
 
-        // Trend Chart
         const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const trendChart = new Chart(trendCtx, {
+        new Chart(trendCtx, {
             type: 'line',
             data: {
                 labels: ['1. Dönem', '2. Dönem', '3. Dönem'],
@@ -506,39 +495,36 @@
             }
         });
 
-        // Gap Chart
         let gapChart;
-        function updateGapChart() {
-            const period = document.getElementById('periodSelect').value;
-            const periodData = data[`period${period}`];
+        function updateGap() {
+            const p = document.getElementById('periodSelect').value;
+            const pd = data['period' + p];
             
-            const gapData = competencies.map((comp, idx) => {
-                const selfScore = periodData.self[idx] || 0;
-                const seyirScore = periodData.seyir[idx] || 0;
+            const gd = competencies.map((c, i) => {
+                const s = pd.self[i] || 0;
+                const sy = pd.seyir[i] || 0;
                 return {
-                    name: comp.length > 50 ? comp.substring(0, 50) + '...' : comp,
-                    gap: selfScore - seyirScore
+                    name: c.length > 50 ? c.substring(0, 50) + '...' : c,
+                    gap: s - sy
                 };
             }).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
 
-            if (gapChart) {
-                gapChart.destroy();
-            }
+            if (gapChart) gapChart.destroy();
 
-            const gapCtx = document.getElementById('gapChart').getContext('2d');
-            gapChart = new Chart(gapCtx, {
+            const ctx = document.getElementById('gapChart').getContext('2d');
+            gapChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: gapData.map(d => d.name),
+                    labels: gd.map(d => d.name),
                     datasets: [{
                         label: 'Gap (Kendisi - Seyir)',
-                        data: gapData.map(d => d.gap),
-                        backgroundColor: gapData.map(d => 
+                        data: gd.map(d => d.gap),
+                        backgroundColor: gd.map(d => 
                             d.gap > 0 ? 'rgba(245, 158, 11, 0.8)' : 
                             d.gap < 0 ? 'rgba(239, 68, 68, 0.8)' : 
                             'rgba(148, 163, 184, 0.8)'
                         ),
-                        borderColor: gapData.map(d => 
+                        borderColor: gd.map(d => 
                             d.gap > 0 ? '#f59e0b' : 
                             d.gap < 0 ? '#ef4444' : 
                             '#94a3b8'
@@ -565,73 +551,60 @@
             });
         }
 
-        // Initialize gap chart
-        updateGapChart();
+        document.getElementById('periodSelect').addEventListener('change', updateGap);
+        updateGap();
 
-        // Improvement List
-        const improvementData = competencies.map((comp, idx) => ({
-            name: comp,
-            improvement: (data.period3.self[idx] || 0) - (data.period1.self[idx] || 0)
+        const imp = competencies.map((c, i) => ({
+            name: c,
+            improvement: (data.period3.self[i] || 0) - (data.period1.self[i] || 0)
         })).sort((a, b) => b.improvement - a.improvement).slice(0, 5);
 
-        const improvementList = document.getElementById('improvementList');
-        improvementData.forEach((item, idx) => {
+        const impList = document.getElementById('improvementList');
+        imp.forEach((item, idx) => {
             const div = document.createElement('div');
             div.className = 'improvement-item';
-            div.innerHTML = `
-                <div class="improvement-badge">${idx + 1}</div>
-                <div class="improvement-text">${item.name}</div>
-                <div class="improvement-score">↗ +${item.improvement}</div>
-            `;
-            improvementList.appendChild(div);
+            div.innerHTML = '<div class="improvement-badge">' + (idx + 1) + '</div>' +
+                '<div class="improvement-text">' + item.name + '</div>' +
+                '<div class="improvement-score">↗ +' + item.improvement + '</div>';
+            impList.appendChild(div);
         });
 
-        // Detailed Table
-        const table = document.getElementById('detailedTable');
-        let tableHTML = `
-            <thead>
-                <tr>
-                    <th>Yetkinlik</th>
-                    <th class="center">1.Dönem<br>Kendisi</th>
-                    <th class="center">1.Dönem<br>Seyir</th>
-                    <th class="center">2.Dönem<br>Kendisi</th>
-                    <th class="center">2.Dönem<br>Seyir</th>
-                    <th class="center">3.Dönem<br>Kendisi</th>
-                    <th class="center">3.Dönem<br>Seyir</th>
-                    <th class="center">3.Dönem<br>Gap</th>
-                </tr>
-            </thead>
-            <tbody>
-        `;
+        const tbl = document.getElementById('detailedTable');
+        let html = '<thead><tr><th>Yetkinlik</th>' +
+            '<th class="center">1.Dönem<br>Kendisi</th>' +
+            '<th class="center">1.Dönem<br>Seyir</th>' +
+            '<th class="center">2.Dönem<br>Kendisi</th>' +
+            '<th class="center">2.Dönem<br>Seyir</th>' +
+            '<th class="center">3.Dönem<br>Kendisi</th>' +
+            '<th class="center">3.Dönem<br>Seyir</th>' +
+            '<th class="center">3.Dönem<br>Gap</th>' +
+            '</tr></thead><tbody>';
 
-        competencies.forEach((comp, idx) => {
-            const p1Self = data.period1.self[idx] || 0;
-            const p1Seyir = data.period1.seyir[idx] || 0;
-            const p2Self = data.period2.self[idx] || 0;
-            const p2Seyir = data.period2.seyir[idx] || 0;
-            const p3Self = data.period3.self[idx] || 0;
-            const p3Seyir = data.period3.seyir[idx] || 0;
-            const gap3 = p3Self - p3Seyir;
+        competencies.forEach((c, i) => {
+            const p1s = data.period1.self[i] || 0;
+            const p1sy = data.period1.seyir[i] || 0;
+            const p2s = data.period2.self[i] || 0;
+            const p2sy = data.period2.seyir[i] || 0;
+            const p3s = data.period3.self[i] || 0;
+            const p3sy = data.period3.seyir[i] || 0;
+            const g3 = p3s - p3sy;
             
-            const gapClass = gap3 > 0 ? 'gap-positive' : gap3 < 0 ? 'gap-negative' : 'gap-neutral';
-            const gapIcon = gap3 > 0 ? '↗' : gap3 < 0 ? '↘' : '−';
+            const gc = g3 > 0 ? 'gap-positive' : g3 < 0 ? 'gap-negative' : 'gap-neutral';
+            const gi = g3 > 0 ? '↗' : g3 < 0 ? '↘' : '−';
 
-            tableHTML += `
-                <tr>
-                    <td>${comp}</td>
-                    <td class="center self">${p1Self}</td>
-                    <td class="center seyir">${p1Seyir}</td>
-                    <td class="center self">${p2Self}</td>
-                    <td class="center seyir">${p2Seyir}</td>
-                    <td class="center self">${p3Self}</td>
-                    <td class="center seyir">${p3Seyir}</td>
-                    <td class="gap-cell ${gapClass}">${gapIcon} ${gap3 > 0 ? '+' : ''}${gap3}</td>
-                </tr>
-            `;
+            html += '<tr><td>' + c + '</td>' +
+                '<td class="center self">' + p1s + '</td>' +
+                '<td class="center seyir">' + p1sy + '</td>' +
+                '<td class="center self">' + p2s + '</td>' +
+                '<td class="center seyir">' + p2sy + '</td>' +
+                '<td class="center self">' + p3s + '</td>' +
+                '<td class="center seyir">' + p3sy + '</td>' +
+                '<td class="gap-cell ' + gc + '">' + gi + ' ' + (g3 > 0 ? '+' : '') + g3 + '</td>' +
+                '</tr>';
         });
 
-        tableHTML += '</tbody>';
-        table.innerHTML = tableHTML;
+        html += '</tbody>';
+        tbl.innerHTML = html;
     </script>
 </body>
 </html>
